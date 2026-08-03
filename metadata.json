@@ -1,0 +1,6 @@
+{
+  "name": "MogMeter AI - Yüz Estetiği ve Mogging Analizi",
+  "description": "Yapay zeka ile yüz simetrisi, çene hattı, göz yapısı ve altın oran analizi yapan profesyonel Mogging & Looksmaxing platformu.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
