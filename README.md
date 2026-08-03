@@ -40,13 +40,15 @@ cd mogmeter-ai
 npm install
 ```
 
-### 3. Ortam Değişkenlerini Ayarlayın
+### 3. Ortam Değişkenlerini Ayarlayın (Opsiyonel)
 
-Kök dizinde `.env` dosyası oluşturun ve Gemini API anahtarınızı ekleyin:
+Kök dizinde `.env` dosyası oluşturun:
 
 ```env
 GEMINI_API_KEY="AIzaSy..."
 ```
+
+**Önemli:** Artık kullanıcılar kendi API anahtarlarını kullanabilir! `.env` dosyasındaki anahtar sadece yedek (fallback) olarak kullanılacaktır. Kullanıcılar arayüzden kendi anahtarlarını girdiklerinde sistem o anahtarı kullanır.
 
 *(API anahtarınızı [Google AI Studio](https://aistudio.google.com/) üzerinden ücretsiz temin edebilirsiniz.)*
 
@@ -57,6 +59,29 @@ npm run dev
 ```
 
 Uygulama `http://localhost:3000` adresinde çalışacaktır.
+
+---
+
+## 👤 Kullanıcı API Anahtarı Nasıl Kullanılır?
+
+MogMeter AI artık **kullanıcı bazlı API anahtarı** desteği sunuyor. Bu sayede her kullanıcı kendi Gemini API anahtarını kullanarak analiz yapabilir.
+
+### Adım Adım Kullanım:
+
+1. **Uygulamayı Açın**: `http://localhost:3000` adresine gidin.
+2. **API Anahtarınızı Girin**: Sayfanın üst kısmında bulunan **"Gemini API Anahtarınız"** input alanına Google AI Studio'dan aldığınız API anahtarını yapıştırın.
+   - Input alanı `type="password"` olduğu için anahtar gizli görünür.
+   - Yanındaki 👁️ ikonuna tıklayarak anahtarı geçici olarak görebilirsiniz.
+3. **Otomatik Kayıt**: Anahtarınızı girdiğinizde tarayıcının `localStorage` alanına güvenli bir şekilde kaydedilir.
+4. **Analiz Yapın**: Fotoğraf yükleyin veya kamera ile çekim yapın. Sistem kayıtlı API anahtarınızı otomatik olarak kullanacaktır.
+5. **Tekrar Giriş Yok**: Tarayıcıyı kapatıp tekrar açsanız bile API anahtarınız hatırlanır, yeniden girmenize gerek yoktur.
+
+### ⚠️ Önemli Notlar:
+
+- Eğer API anahtarı girilmeden analiz yapılmaya çalışılırsa, sistem **"Lütfen önce API anahtarınızı girin"** uyarısı verecektir.
+- API anahtarınız yalnızca tarayıcınızda (`localStorage`) saklanır, sunucuya kalıcı olarak kaydedilmez.
+- Her analiz isteğinde anahtarınız güvenli bir şekilde backend'e gönderilir ve Gemini API'ye iletilir.
+- `.env` dosyasındaki `GEMINI_API_KEY` artık sadece yedek amaçlıdır; kullanıcı anahtarı girilmediğinde devreye girer.
 
 ---
 
@@ -74,8 +99,11 @@ npm start
 
 ## 🛡️ Güvenlik ve Gizlilik
 
-- Gemini API anahtarı istemciye (tarayıcıya) **asla gönderilmez**. Tüm AI istekleri sunucu tarafındaki Express proxy (`/api/analyze-face`) üzerinden güvenli bir şekilde iletilir.
-- Kullanıcı fotoğrafları üçüncü taraf veritabanlarına kaydedilmez, yalnızca anlık analiz için kullanılır.
+- **Kullanıcı Bazlı API Anahtarı**: Her kullanıcı kendi Gemini API anahtarını tarayıcısında (`localStorage`) saklar. Bu sayede sunucu maliyeti ortadan kalkar.
+- **Güvenli İletim**: Kullanıcı API anahtarı her istekte şifreli HTTPS üzerinden backend'e iletilir ve doğrudan Gemini API'ye forwarded edilir, sunucuda loglanmaz veya kaydedilmez.
+- **Yedek Anahtar Desteği**: `.env` dosyasındaki `GEMINI_API_KEY` sadece kullanıcı anahtarı girilmediğinde devreye giren bir fallback mekanizmasıdır.
+- **Veri Gizliliği**: Kullanıcı fotoğrafları üçüncü taraf veritabanlarına kaydedilmez, yalnızca anlık analiz için kullanılır ve bellekten silinir.
+- **Local Storage**: API anahtarınız yalnızca kendi tarayıcınızda saklanır, başka hiçbir yere gönderilmez.
 
 ---
 
