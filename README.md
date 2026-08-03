@@ -30,7 +30,7 @@
 ### 1. Repoyu Kopyalayın
 
 ```bash
-git clone https://github.com/KULLANICI_ADI/mogmeter-ai.git
+git clone https://github.com/your-username/mogmeter-ai.git
 cd mogmeter-ai
 ```
 
