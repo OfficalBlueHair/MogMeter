@@ -1,18 +1,1 @@
-```gitignore
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-
-# Environment
-.env
-.env.local
-.env.*
-
-# Editors
-.vscode/
-.idea/
-
-# Original rules preserved
-*.log
-```
+Nothing should be ignored based on the provided file changes. The only modified file is README.md, which is a source/config file and should not be ignored.
