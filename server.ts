@@ -13,13 +13,13 @@ const PORT = 3000;
 app.use(express.json({ limit: "25mb" }));
 
 // Initialize Gemini client on server side
-function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("GEMINI_API_KEY environment variable is missing.");
+function getGeminiClient(apiKey?: string) {
+  const key = apiKey || process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error("GEMINI_API_KEY environment variable is missing or no user API key provided.");
   }
   return new GoogleGenAI({
-    apiKey,
+    apiKey: key,
     httpOptions: {
       headers: {
         "User-Agent": "aistudio-build",
@@ -31,7 +31,7 @@ function getGeminiClient() {
 // API Endpoint for Facial Mogging & Aesthetics Analysis
 app.post("/api/analyze-face", async (req, res) => {
   try {
-    const { imageBase64, mimeType = "image/jpeg", faceName } = req.body;
+    const { imageBase64, mimeType = "image/jpeg", faceName, userApiKey } = req.body;
 
     if (!imageBase64) {
       return res.status(400).json({ error: "Fotoğraf verisi (imageBase64) zorunludur." });
@@ -61,7 +61,8 @@ app.post("/api/analyze-face", async (req, res) => {
       finalBase64 = imageBase64;
     }
 
-    const ai = getGeminiClient();
+    // Use user-provided API key if available, otherwise fall back to environment variable
+    const ai = getGeminiClient(userApiKey);
 
     const systemInstruction = `
 Sen dünya standartlarında uzman bir Yüz Estetiği, Altın Oran ve Facial Morphology (Looksmaxing / Mogging) Analizcisisin.

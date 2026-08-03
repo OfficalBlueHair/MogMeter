@@ -25,6 +25,7 @@ import {
   Sliders,
   ShieldCheck,
   UserCheck,
+  Key,
 } from 'lucide-react';
 
 export default function App() {
@@ -43,17 +44,36 @@ export default function App() {
   const [analysisResult, setAnalysisResult] = useState<MogAnalysisResult | null>(null);
   const [history, setHistory] = useState<MogAnalysisResult[]>([]);
 
-  // Load history from localStorage on startup
+  // Gemini API Key state
+  const [geminiApiKey, setGeminiApiKey] = useState<string>('');
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
+
+  // Load history and API key from localStorage on startup
   useEffect(() => {
     try {
       const saved = localStorage.getItem('mogmeter_history');
       if (saved) {
         setHistory(JSON.parse(saved));
       }
+      const savedApiKey = localStorage.getItem('user_gemini_api_key');
+      if (savedApiKey) {
+        setGeminiApiKey(savedApiKey);
+      }
     } catch (e) {
       console.error('Geçmiş okunamadı:', e);
     }
   }, []);
+
+  // Save API key to localStorage when changed
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newKey = e.target.value;
+    setGeminiApiKey(newKey);
+    if (newKey.trim()) {
+      localStorage.setItem('user_gemini_api_key', newKey.trim());
+    } else {
+      localStorage.removeItem('user_gemini_api_key');
+    }
+  };
 
   const saveToHistory = (res: MogAnalysisResult) => {
     setHistory((prev) => {
@@ -87,12 +107,19 @@ export default function App() {
   };
 
   const executeAnalysis = async (imgBase64: string, name?: string): Promise<MogAnalysisResult> => {
+    // Check if API key is provided
+    const apiKey = geminiApiKey.trim();
+    if (!apiKey) {
+      throw new Error('Lütfen önce API anahtarınızı girin');
+    }
+
     const response = await fetch('/api/analyze-face', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         imageBase64: imgBase64,
         faceName: name || faceName || 'Analiz Edilen Yüz',
+        userApiKey: apiKey,
       }),
     });
 
@@ -138,6 +165,44 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-emerald-500 selection:text-stone-950">
+      {/* API Key Banner */}
+      <div className="bg-stone-900/90 border-b border-stone-800 px-4 md:px-8 py-3">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex items-center gap-2 text-emerald-400">
+            <Key className="w-4 h-4" />
+            <span className="text-xs font-semibold">Gemini API Anahtarı</span>
+          </div>
+          <div className="flex-1 w-full sm:max-w-md relative">
+            <input
+              type={showApiKey ? 'text' : 'password'}
+              value={geminiApiKey}
+              onChange={handleApiKeyChange}
+              placeholder="AIzaSy... ile başlayan anahtarınızı girin"
+              className="w-full px-3.5 py-2 bg-stone-950 border border-stone-800 rounded-xl text-xs text-stone-200 focus:outline-none focus:border-emerald-500 pr-20"
+            />
+            <button
+              onClick={() => setShowApiKey(!showApiKey)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 transition-colors"
+              type="button"
+            >
+              {showApiKey ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              )}
+            </button>
+          </div>
+          <p className="text-[10px] text-stone-500 hidden sm:block">
+            Anahtarınız sadece tarayıcınızda saklanır ve analiz için kullanılır.
+          </p>
+        </div>
+      </div>
+
       {/* Top Header */}
       <header className="border-b border-stone-800/80 bg-stone-900/80 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
